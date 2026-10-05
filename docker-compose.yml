@@ -1,0 +1,23 @@
+# NetMon - consola de monitoreo (FortiGate + Huawei) con alertas a Telegram
+name: consola-monitoreo
+# Uso:  docker compose up -d --build      |  logs:  docker compose logs -f
+services:
+  netmon:
+    build: .
+    image: consola-monitoreo:latest
+    container_name: netmon
+    restart: unless-stopped
+    env_file:
+      - .env                      # token de Telegram y communities (no se sube a GitHub)
+    environment:
+      - TZ=America/Bogota
+      - NETMON_DB=/app/data/netmon.db
+    ports:
+      - "8090:8090"               # tablero web  -> http://localhost:8090
+      - "162:162/udp"             # traps SNMP enviados por los equipos
+    volumes:
+      - ./config.yaml:/app/config/config.yaml:ro   # equipos e IPs
+      - netmon-data:/app/data                      # historial de eventos (SQLite)
+
+volumes:
+  netmon-data:
