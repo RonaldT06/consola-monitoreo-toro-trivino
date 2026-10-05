@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Informe Corte 2 · Consola de monitoreo · Ronald Toro</title>
+<style>
+  @page { size: A4; margin: 18mm 18mm 20mm; }
+  * { box-sizing: border-box; }
+  body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #1d1d1b; font-size: 10.5pt; line-height: 1.5; margin: 0; }
+  h1 { font-size: 26pt; line-height: 1.15; margin: 0 0 10pt; letter-spacing: -0.01em; }
+  h2 { font-size: 15pt; margin: 22pt 0 8pt; padding-bottom: 4pt; border-bottom: 2px solid #2a78d6; break-after: avoid; }
+  h3 { font-size: 11.5pt; margin: 14pt 0 4pt; break-after: avoid; }
+  p { margin: 0 0 7pt; }
+  ul { margin: 0 0 8pt; padding-left: 16pt; }
+  li { margin-bottom: 3pt; }
+  code { font-family: Consolas, "Cascadia Mono", monospace; font-size: 9.5pt; background: #f1f0ec; padding: 1pt 4pt; border-radius: 3pt; }
+  pre { font-family: Consolas, "Cascadia Mono", monospace; font-size: 9pt; background: #f4f4f2; border: 1px solid #e2e1dc; border-radius: 6pt; padding: 8pt 10pt; white-space: pre-wrap; margin: 4pt 0 8pt; break-inside: avoid; }
+  table { width: 100%; border-collapse: collapse; margin: 4pt 0 10pt; font-size: 9.5pt; break-inside: avoid; }
+  th { text-align: left; background: #eef4fc; color: #1c3f6e; font-weight: 600; }
+  th, td { border: 1px solid #dcdbd5; padding: 5pt 7pt; vertical-align: top; }
+  .muted { color: #6b6a65; }
+
+  /* Portada */
+  .cover { height: 255mm; display: flex; flex-direction: column; justify-content: space-between; break-after: page; }
+  .cover .band { height: 8mm; background: #2a78d6; border-radius: 3pt; }
+  .cover .kicker { font-size: 11pt; font-weight: 600; color: #2a78d6; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 8pt; }
+  .cover .sub { font-size: 13pt; color: #52514e; max-width: 140mm; }
+  .cover dl { display: grid; grid-template-columns: 38mm 1fr; gap: 6pt 10pt; font-size: 11.5pt; margin: 0; }
+  .cover dt { color: #6b6a65; }
+  .cover dd { margin: 0; font-weight: 600; }
+  .cover a { color: #1c5cab; }
+
+  figure { margin: 6pt 0 12pt; break-inside: avoid; }
+  figure img { width: 100%; border: 1px solid #dcdbd5; border-radius: 6pt; display: block; }
+  figcaption { font-size: 9pt; color: #52514e; margin-top: 4pt; }
+  .ph { border: 2px dashed #9a9994; border-radius: 6pt; height: 70mm; display: flex; align-items: center; justify-content: center; text-align: center; color: #7a7974; font-size: 11pt; padding: 10pt; }
+  .step { break-inside: avoid; }
+  .step-num { display: inline-block; background: #2a78d6; color: #fff; border-radius: 50%; width: 18pt; height: 18pt; text-align: center; line-height: 18pt; font-weight: 700; font-size: 10pt; margin-right: 6pt; }
+  .note { background: #fff7e6; border-left: 3pt solid #eda100; padding: 6pt 9pt; border-radius: 3pt; margin: 6pt 0 10pt; font-size: 9.5pt; }
+</style>
+</head>
+<body>
+
+<!-- ============================ PORTADA ============================ -->
+<section class="cover">
+  <div class="band"></div>
+  <div>
+    <div class="kicker">Informe · Corte 2</div>
+    <h1>Consola de monitoreo de red con alertas a Telegram</h1>
+    <p class="sub">FortiGate, switch Huawei y router Huawei vigilados por SNMP desde un tablero web propio, desplegado con Docker.</p>
+  </div>
+  <dl>
+    <dt>Estudiante</dt><dd>Ronald Toro</dd>
+    <dt>Repositorio</dt><dd><a id="repo" href="https://github.com/TU-USUARIO/consola-monitoreo-toro">https://github.com/TU-USUARIO/consola-monitoreo-toro</a></dd>
+    <dt>Herramienta</dt><dd>NetMon (Python · FastAPI · SNMP · Docker)</dd>
+    <dt>Fecha</dt><dd>Octubre de 2026</dd>
+  </dl>
+  <div class="band" style="height:2mm;opacity:.5"></div>
+</section>
+
+<!-- ============================ 1 ============================ -->
+<h2>1. Qué hace la herramienta</h2>
+<p><b>NetMon</b> es una consola de monitoreo desarrollada desde cero en Python. Vigila tres equipos de red del laboratorio, muestra su estado en un tablero web en tiempo real y envía una alerta a Telegram cuando algo falla. No usa herramientas de terceros como Zabbix o Grafana: el sondeo SNMP, el motor de alertas, el tablero y el bot son código propio. Todo corre dentro de un contenedor Docker.</p>
+<ul>
+  <li><b>Sondeo SNMP cada 10 s:</b> uptime, CPU, memoria, temperatura, sesiones y estado y tráfico de cada interfaz.</li>
+  <li><b>Traps SNMP (UDP 162):</b> los equipos avisan por su cuenta cuando cae un enlace, y NetMon reacciona en segundos.</li>
+  <li><b>Tablero web</b> (puerto 8090): cada equipo en verde o rojo, gráficas de la última hora, alertas activas e historial.</li>
+  <li><b>Telegram:</b> mensaje inmediato ante caídas, interfaces desconectadas, reinicios o CPU/memoria altas, más los comandos <code>/estado</code>, <code>/interfaces</code> y <code>/alertas</code>.</li>
+  <li><b>Historial:</b> todos los eventos quedan guardados en una base SQLite, dentro de un volumen de Docker.</li>
+</ul>
+
+<h3>Alertas que genera</h3>
+<table>
+  <tr><th>Evento</th><th>Cómo se detecta</th><th>Severidad</th></tr>
+  <tr><td>Equipo apagado o sin conexión</td><td>Fallan SNMP y ping en 2 sondeos seguidos</td><td>Crítica</td></tr>
+  <tr><td>Equipo recuperado (indica si se reinició)</td><td>Vuelve a responder; se compara el uptime</td><td>Informativa</td></tr>
+  <tr><td>Interfaz caída</td><td><code>ifOperStatus</code> = down o trap linkDown</td><td>Crítica</td></tr>
+  <tr><td>Interfaz en shutdown</td><td><code>ifAdminStatus</code> = down</td><td>Advertencia</td></tr>
+  <tr><td>CPU, memoria, temperatura o disco altos</td><td>Umbral superado en 2 sondeos seguidos</td><td>Advertencia</td></tr>
+  <tr><td>Responde ping pero no SNMP</td><td>Diagnóstico de community o ACL</td><td>Advertencia</td></tr>
+</table>
+
+<!-- ============================ 2 ============================ -->
+<h2>2. Equipos monitoreados</h2>
+<table>
+  <tr><th>Equipo</th><th>Rol</th><th>IP de gestión</th><th>Información obtenida (MIB)</th></tr>
+  <tr><td>FortiGate</td><td>Firewall</td><td>192.168.100.1</td><td>CPU, memoria, sesiones y disco (FORTINET-FORTIGATE-MIB); interfaces (IF-MIB)</td></tr>
+  <tr><td>Huawei S57xx</td><td>Switch</td><td>192.168.100.2</td><td>CPU, memoria y temperatura (HUAWEI-ENTITY-EXTENT-MIB); interfaces (IF-MIB)</td></tr>
+  <tr><td>Huawei AR</td><td>Router</td><td>192.168.100.3</td><td>CPU, memoria y temperatura (HUAWEI-ENTITY-EXTENT-MIB); interfaces (IF-MIB)</td></tr>
+  <tr><td>PC con Docker</td><td>Servidor NetMon</td><td>192.168.100.10</td><td>Ejecuta el contenedor; recibe traps en UDP 162</td></tr>
+</table>
+<p>En cada equipo se habilitó SNMP v2c de <b>solo lectura</b>. El acceso está restringido a la IP del servidor: con una ACL en los Huawei y con la lista de <code>hosts</code> en el FortiGate. Los equipos envían sus traps a esa misma IP. Los comandos exactos están en la carpeta <code>configs/</code> del repositorio.</p>
+
+<!-- ============================ 3 ============================ -->
+<h2>3. Cómo encaja todo</h2>
+<figure>
+  <img src="diagrama.png" alt="Diagrama de arquitectura">
+  <figcaption>Figura 1. Los equipos responden consultas SNMP (UDP 161) y envían traps (UDP 162) al contenedor <i>netmon</i>, que alimenta el tablero web y el bot de Telegram.</figcaption>
+</figure>
+<ol>
+  <li>El <b>sondeo SNMP</b> pregunta a cada equipo cada 10 s y entrega los datos al motor de alertas. Usa GET para valores únicos y WALK para tablas como las interfaces.</li>
+  <li>El <b>receptor de traps</b> escucha los avisos de los equipos. Un linkDown, por ejemplo, fuerza un sondeo inmediato, así la alerta llega en segundos.</li>
+  <li>El <b>motor de alertas</b> compara cada sondeo con el anterior y detecta cambios: equipo caído o recuperado, interfaz abajo o arriba, umbrales superados. Cada cambio se convierte en un evento.</li>
+  <li>Cada evento se guarda en <b>SQLite</b>, se envía a <b>Telegram</b> y se empuja al <b>tablero web</b> por WebSocket, sin necesidad de recargar la página.</li>
+</ol>
+<p>Los secretos (token del bot, chat_id y communities SNMP) están en el archivo <code>.env</code>, que Docker inyecta al contenedor y que <code>.gitignore</code> excluye del repositorio. El archivo <code>config.yaml</code> solo contiene IPs y umbrales.</p>
+
+<!-- ============================ 4 ============================ -->
+<h2>4. Pasos realizados</h2>
+
+<div class="step">
+<h3><span class="step-num">1</span>Configurar SNMP en los equipos</h3>
+<p>En cada equipo se aplicó la configuración de <code>configs/</code>, que hace tres cosas: activar SNMP v2c de solo lectura, permitir el acceso solo desde 192.168.100.10 y enviar los traps a esa misma IP. Por ejemplo, en el switch Huawei:</p>
+<pre>snmp-agent sys-info version v2c
+snmp-agent community read cipher ******** acl 2099
+snmp-agent target-host trap address udp-domain 192.168.100.10 params securityname cipher ******** v2c
+snmp-agent trap enable</pre>
+</div>
+
+<div class="step">
+<h3><span class="step-num">2</span>Levantar la consola con Docker</h3>
+<p>Se copió <code>.env.example</code> como <code>.env</code>, se llenaron el token, el chat_id y las communities, y se levantó el contenedor con <code>docker compose up -d --build</code>. Para verificar que quedó corriendo y publicando los puertos 8090/tcp y 162/udp se usó <code>docker ps</code>.</p>
+<figure>
+  <img src="capturas/01-docker.png" onerror="this.outerHTML='&lt;div class=ph&gt;Captura 01-docker.png&lt;br&gt;(resultado de docker ps)&lt;/div&gt;'" alt="docker ps">
+  <figcaption>Captura 01. El contenedor <i>netmon</i> en ejecución (<code>docker ps</code>).</figcaption>
+</figure>
+</div>
+
+<div class="step">
+<h3><span class="step-num">3</span>Verificar el tablero con los equipos en línea</h3>
+<p>En <code>http://localhost:8090</code> el tablero muestra los tres equipos en <b>verde</b> con su uptime, CPU, memoria, gráficas y la tabla de interfaces. Telegram recibe el mensaje «NetMon iniciado» y uno de «conectado» por cada equipo.</p>
+<figure>
+  <img src="capturas/02-tablero.png" onerror="this.outerHTML='&lt;div class=ph&gt;Captura 02-tablero.png&lt;br&gt;(tablero con los equipos en verde)&lt;/div&gt;'" alt="Tablero en verde">
+  <figcaption>Captura 02. Tablero con los tres equipos en línea.</figcaption>
+</figure>
+</div>
+
+<div class="step">
+<h3><span class="step-num">4</span>Simular una falla: equipo caído</h3>
+<p>Se apagó o desconectó uno de los equipos. Tras dos sondeos sin respuesta (unos 20 s), el tablero lo marcó en <b>rojo</b> como «Caído», con la alerta crítica en el panel de alertas activas.</p>
+<figure>
+  <img src="capturas/03-caido.png" onerror="this.outerHTML='&lt;div class=ph&gt;Captura 03-caido.png&lt;br&gt;(un equipo en rojo)&lt;/div&gt;'" alt="Equipo caído">
+  <figcaption>Captura 03. Un equipo caído, marcado en rojo.</figcaption>
+</figure>
+</div>
+
+<div class="step">
+<h3><span class="step-num">5</span>Recibir la alerta en Telegram</h3>
+<p>En el mismo momento el bot envió la alerta «🔴 … NO RESPONDE» al chat configurado. Al encender el equipo de nuevo llegó «🟢 volvió a responder», indicando si se reinició.</p>
+<figure>
+  <img src="capturas/04-telegram.png" onerror="this.outerHTML='&lt;div class=ph&gt;Captura 04-telegram.png&lt;br&gt;(alerta recibida en Telegram)&lt;/div&gt;'" alt="Alerta en Telegram" style="max-height:120mm;width:auto;max-width:100%;margin:0 auto">
+  <figcaption>Captura 04. Alerta recibida en Telegram.</figcaption>
+</figure>
+</div>
+
+<!-- ============================ 5 ============================ -->
+<h2>5. Conclusiones</h2>
+<ul>
+  <li><b>SNMP sigue siendo la base del monitoreo multimarca.</b> Con IF-MIB, que es estándar, se supervisan las interfaces de cualquier fabricante. Las MIB propias de Fortinet y Huawei solo se usan para CPU, memoria y temperatura, así que agregar otra marca es escribir un driver pequeño.</li>
+  <li><b>Combinar sondeo y traps da rapidez y confiabilidad.</b> El sondeo cada 10 s garantiza que ninguna falla pase desapercibida. Los traps reducen el tiempo de aviso a segundos cuando cae un enlace. Combinar SNMP con ping permite distinguir un equipo apagado de un error de configuración SNMP.</li>
+  <li><b>Docker hace el despliegue reproducible.</b> Con <code>docker compose up -d</code> la consola corre igual en cualquier PC. Cambiar de laboratorio o pasar a equipos de producción solo requiere editar las IPs en <code>config.yaml</code>.</li>
+  <li><b>Telegram acorta el tiempo de respuesta.</b> El responsable se entera de una caída en su celular sin tener el tablero abierto, y puede consultar el estado con <code>/estado</code> desde cualquier lugar.</li>
+  <li><b>Los secretos se separan del código.</b> Llevar el token y las communities a <code>.env</code>, excluido por <code>.gitignore</code>, permite publicar el repositorio sin exponer credenciales. Como mejora futura se propone migrar a SNMPv3 (autenticación y cifrado) y agregar más equipos y umbrales por equipo.</li>
+</ul>
+
+</body>
+</html>

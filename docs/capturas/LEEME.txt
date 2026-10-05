@@ -1,0 +1,2 @@
+Coloca aquí las capturas obligatorias:
+01-docker.png  02-tablero.png  03-caido.png  04-telegram.png
