@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NetMon · Monitoreo de red</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%232a78d6'/><path d='M6 20h5l3-9 4 13 3-7h5' stroke='white' stroke-width='2.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><rect width="32" height="32" rx="7" fill="var(--series-1)"/><path d="M6 20h5l3-9 4 13 3-7h5" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div>
+        <h1>NetMon</h1>
+        <p class="muted">Monitoreo de red en tiempo real</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <span id="conn" class="conn" title="Conexión con el servidor"><i></i><span>Conectando…</span></span>
+      <button id="btn-sound" class="btn ghost" title="Sonido en alertas críticas" aria-pressed="false">🔕 Sonido</button>
+      <button id="btn-tg" class="btn ghost" title="Enviar mensaje de prueba a Telegram">✈️ Probar Telegram</button>
+      <button id="btn-theme" class="btn ghost" title="Cambiar tema" aria-label="Cambiar tema">◐</button>
+    </div>
+  </header>
+
+  <div id="sim-banner" class="sim-banner" hidden>
+    🧪 <b>Modo simulador</b> — usa los botones de cada equipo para apagarlo, hacer <i>shutdown</i>, desconectar cables o provocar picos de CPU y ver las alertas (y los mensajes en Telegram).
+  </div>
+
+  <main>
+    <section class="kpis" id="kpis" aria-label="Resumen"></section>
+
+    <div class="layout">
+      <section class="devices" id="devices" aria-label="Equipos"></section>
+
+      <aside class="side">
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Alertas activas</h2>
+            <span class="count" id="active-count">0</span>
+          </div>
+          <ul class="alerts" id="active"></ul>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Eventos</h2>
+            <div class="filters">
+              <select id="f-dev" aria-label="Filtrar por equipo"><option value="">Todos</option></select>
+              <select id="f-sev" aria-label="Filtrar por severidad">
+                <option value="">Todas</option>
+                <option value="critical">Críticas</option>
+                <option value="warning">Advertencias</option>
+                <option value="info">Informativas</option>
+              </select>
+            </div>
+          </div>
+          <ul class="events" id="events"></ul>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+  <div class="tooltip" id="tip" hidden></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
