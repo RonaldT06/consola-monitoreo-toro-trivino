@@ -1,0 +1,21 @@
+# Secretos: nunca al repositorio
+.env
+*.env
+!.env.example
+
+# Datos generados en ejecución
+*.db
+*.db-journal
+data/
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# Sistema / editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

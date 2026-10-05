@@ -1,0 +1,82 @@
+# =====================================================================
+#  NetMon - Configuración (plantilla documentada)
+#  Los secretos (token de Telegram, communities SNMP) NO van aquí: se escriben
+#  en el archivo .env y se referencian con la sintaxis dólar-llave (ver abajo). Mira .env.example
+#  Copia este archivo como config.yaml y ajusta IPs / credenciales.
+#  Para pasar de PNETLab a equipos físicos SOLO cambias las IPs
+#  (y credenciales) de la sección "devices".
+# =====================================================================
+
+general:
+  poll_interval: 10        # segundos entre consultas a cada equipo
+  snmp_timeout: 2          # segundos por consulta SNMP
+  snmp_retries: 1
+  down_after: 2            # sondeos fallidos seguidos para declarar "equipo caído"
+  history_points: 360      # puntos de historia en las gráficas (360 x 10s = 1h)
+  db_path: netmon.db       # historial de eventos (SQLite)
+
+web:
+  host: 0.0.0.0
+  port: 8090
+
+thresholds:                # umbrales de alerta (se pueden sobreescribir por equipo)
+  cpu_high: 80             # %
+  mem_high: 85             # %
+  temp_high: 70            # °C
+  disk_high: 90            # % (FortiGate)
+  sustain: 2               # sondeos seguidos por encima del umbral antes de alertar
+
+telegram:
+  enabled: true
+  bot_token: "${TELEGRAM_BOT_TOKEN}"       # se lee del archivo .env (nunca lo escribas aquí)
+  chat_ids: "${TELEGRAM_CHAT_IDS}"         # .env  (varios: separados por coma)
+  min_severity: info       # info | warning | critical
+  commands: true           # responder a /estado, /interfaces, /alertas
+
+traps:
+  enabled: true
+  listen: 0.0.0.0
+  port: 162                # 162 requiere admin/root. Puedes usar 1162 y configurarlo en los equipos
+  communities: ["${SNMP_TRAP_COMMUNITY}", "${SNMP_COMMUNITY}"]   # FortiGate envía traps con su community
+
+# ---------------------------------------------------------------------
+#  Equipos
+#  vendor: fortigate | huawei | generic
+#  snmp.version: 2c | 3
+# ---------------------------------------------------------------------
+devices:
+  - name: FW-FORTIGATE
+    vendor: fortigate
+    host: 192.168.100.1
+    role: Firewall
+    snmp:
+      version: 2c
+      community: "${SNMP_COMMUNITY}"
+
+  - name: SW-HUAWEI
+    vendor: huawei
+    host: 192.168.100.2
+    role: Switch
+    snmp:
+      version: 2c
+      community: "${SNMP_COMMUNITY}"
+
+  - name: RT-HUAWEI
+    vendor: huawei
+    host: 192.168.100.3
+    role: Router
+    snmp:
+      version: 2c
+      community: "${SNMP_COMMUNITY}"
+    # Ejemplo SNMPv3 (recomendado en equipos físicos):
+    # snmp:
+    #   version: 3
+    #   user: netmon
+    #   auth_protocol: sha      # md5 | sha | sha256
+    #   auth_key: "ClaveAuth2026!"
+    #   priv_protocol: aes      # des | aes | aes256
+    #   priv_key: "ClavePriv2026!"
+    # Opcional por equipo:
+    # thresholds: {cpu_high: 90}
+    # exclude_interfaces: "^(NULL|InLoopBack)"
+    # ping: true

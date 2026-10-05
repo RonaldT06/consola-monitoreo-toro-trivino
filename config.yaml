@@ -1,0 +1,56 @@
+# =====================================================================
+#  NetMon - Configuración del laboratorio (equipos físicos)
+#  Plan de IPs: red de gestión 192.168.100.0/24
+#    FortiGate .1 | Switch Huawei .2 | Router Huawei .3 | PC/servidor NetMon .10
+#  Los secretos se leen del archivo .env  ->  ${TELEGRAM_BOT_TOKEN}, etc.
+# =====================================================================
+general:
+  poll_interval: 10        # segundos entre consultas a cada equipo
+  snmp_timeout: 2
+  snmp_retries: 1
+  down_after: 2            # sondeos fallidos seguidos para declarar "equipo caído"
+  history_points: 360      # 1 hora de historia en las gráficas
+  db_path: netmon.db       # en Docker se usa /app/data/netmon.db (variable NETMON_DB)
+
+web:
+  host: 0.0.0.0
+  port: 8090
+
+thresholds:
+  cpu_high: 80
+  mem_high: 85
+  temp_high: 70
+  disk_high: 90
+  sustain: 2
+
+telegram:
+  enabled: true
+  bot_token: "${TELEGRAM_BOT_TOKEN}"
+  chat_ids: "${TELEGRAM_CHAT_IDS}"
+  min_severity: info
+  commands: true
+
+traps:
+  enabled: true
+  listen: 0.0.0.0
+  port: 162
+  communities: ["${SNMP_TRAP_COMMUNITY}", "${SNMP_COMMUNITY}"]
+
+devices:
+  - name: FW-FORTIGATE
+    vendor: fortigate
+    host: 192.168.100.1
+    role: Firewall
+    snmp: {version: 2c, community: "${SNMP_COMMUNITY}"}
+
+  - name: SW-HUAWEI
+    vendor: huawei
+    host: 192.168.100.2
+    role: Switch
+    snmp: {version: 2c, community: "${SNMP_COMMUNITY}"}
+
+  - name: RT-HUAWEI
+    vendor: huawei
+    host: 192.168.100.3
+    role: Router
+    snmp: {version: 2c, community: "${SNMP_COMMUNITY}"}
