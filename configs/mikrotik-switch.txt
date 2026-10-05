@@ -1,0 +1,29 @@
+# =====================================================================
+#  MikroTik CHR como SWITCH (bridge) — reemplaza al switch Huawei en el lab
+#  Red de gestión (VMnet8): 192.168.50.0/24  -> cambia "192.168.50" por la tuya
+#  PC con NetMon: 192.168.50.1   | Gateway VMware NAT: 192.168.50.2
+# =====================================================================
+/system identity set name=SW-MIKROTIK
+
+# ether1 = gestión (Cloud0). ether2..ether4 = puertos de switch (bridge)
+/ip address add address=192.168.50.12/24 interface=ether1 comment=GESTION
+/ip route add gateway=192.168.50.2
+
+/interface bridge add name=br-lab comment="Switch del laboratorio"
+/interface bridge port add bridge=br-lab interface=ether2
+/interface bridge port add bridge=br-lab interface=ether3
+/interface bridge port add bridge=br-lab interface=ether4
+
+/interface set ether1 comment="GESTION"
+/interface set ether2 comment="Enlace a FW-FORTIGATE"
+/interface set ether3 comment="Enlace a RT-MIKROTIK"
+
+/snmp community add name=NetMonRO addresses=192.168.50.1/32 read-access=yes write-access=no
+/snmp community set [find default=yes] disabled=yes
+/snmp set enabled=yes contact="NOC" location="Laboratorio" \
+    trap-community=NetMonRO trap-version=2 trap-target=192.168.50.1 \
+    trap-generators=interfaces trap-interfaces=all
+
+# Pruebas de la demo:
+#   /interface disable ether2     -> "shutdown"  (alerta 🟠)
+#   /interface enable ether2

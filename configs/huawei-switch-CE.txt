@@ -1,0 +1,42 @@
+# =====================================================================
+#  Huawei Switch CE (CE12800/CE6800 en PNETLab / CloudEngine físico) — VRP V8
+#  IMPORTANTE: en CE los cambios se aplican con  commit
+#  Servidor NetMon: 192.168.100.10
+#  (Para S5700/S5720 físicos usa la plantilla huawei-router-AR.txt con Vlanif)
+# =====================================================================
+system-view immediately
+sysname SW-HUAWEI
+
+# Gestión por VLAN 100 (o usa MEth0/0/0 si conectas la gestión fuera de banda)
+vlan 100
+interface Vlanif100
+ ip address 192.168.100.2 255.255.255.0
+ quit
+interface GE1/0/0
+ description UPLINK-GESTION
+ undo shutdown
+ port default vlan 100
+ quit
+# En CE las interfaces vienen apagadas: habilita las que uses
+interface GE1/0/1
+ undo shutdown
+ quit
+
+acl number 2000
+ rule 5 permit source 192.168.100.10 0
+ quit
+
+snmp-agent
+snmp-agent sys-info version v2c
+snmp-agent community read cipher NetMonRO acl 2000
+snmp-agent target-host trap address udp-domain 192.168.100.10 params securityname cipher NetMonTrap v2c
+snmp-agent trap source Vlanif100
+snmp-agent trap enable
+return
+
+# si entraste con "system-view" (sin immediately):  commit
+save
+
+# Verificación:
+#   display snmp-agent community
+#   display snmp-agent target-host

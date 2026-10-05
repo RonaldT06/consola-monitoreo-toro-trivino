@@ -1,0 +1,45 @@
+# =====================================================================
+#  Huawei Router AR (AR1000V en PNETLab / AR físico) — VRP V200/V300
+#  También sirve para switches S5700/S5720/S5735 (usar Vlanif para gestión)
+#  Servidor NetMon: 192.168.100.10
+# =====================================================================
+system-view
+sysname RT-HUAWEI
+
+interface GigabitEthernet0/0/0
+ description GESTION
+ ip address 192.168.100.3 255.255.255.0
+ quit
+
+# Solo el servidor NetMon puede consultar SNMP
+acl number 2000
+ rule 5 permit source 192.168.100.10 0
+ rule 10 deny
+ quit
+
+snmp-agent
+snmp-agent sys-info version v2c v3
+snmp-agent community read cipher NetMonRO acl 2000
+snmp-agent sys-info contact NOC
+snmp-agent sys-info location Laboratorio
+
+# Traps hacia NetMon (linkDown/linkUp, reinicios, etc.)
+snmp-agent target-host trap address udp-domain 192.168.100.10 params securityname cipher NetMonTrap v2c
+#   si NetMon escucha en otro puerto:  ... udp-domain 192.168.100.10 udp-port 1162 params ...
+snmp-agent trap source GigabitEthernet0/0/0
+snmp-agent trap enable
+
+return
+save
+
+# ---------------- SNMPv3 (recomendado en físico; la sintaxis varía un poco por versión) ----
+# snmp-agent mib-view included iso-view iso
+# snmp-agent group v3 NetMonGrp privacy read-view iso-view acl 2000
+# snmp-agent usm-user v3 netmon group NetMonGrp
+# snmp-agent usm-user v3 netmon authentication-mode sha      (pide la clave)
+# snmp-agent usm-user v3 netmon privacy-mode aes128          (pide la clave)
+
+# Verificación:
+#   display snmp-agent sys-info
+#   display snmp-agent community
+#   display snmp-agent target-host
