@@ -93,9 +93,9 @@ Luego abre **http://localhost:8090**.
 | | |
 |---|---|
 | **01 · Contenedor corriendo** (`docker ps`) | **02 · Tablero con los equipos en verde** |
-| ![docker ps](docs/capturas/01-docker.png) | ![tablero](docs/capturas/02-tablero.png) |
+| ![docker ps]([docs/capturas/01-docker.png](https://github.com/RonaldT06/consola-monitoreo-toro-trivino/blob/main/docs/capturas/dockerps.png)) | ![tablero]([docs/capturas/02-tablero.png](https://github.com/RonaldT06/consola-monitoreo-toro-trivino/blob/main/docs/capturas/disp_verde.png)) |
 | **03 · Un equipo caído (en rojo)** | **04 · Alerta recibida en Telegram** |
-| ![caído](docs/capturas/03-caido.png) | ![telegram](docs/capturas/04-telegram.png) |
+| ![caído]([docs/capturas/03-caido.png](https://github.com/RonaldT06/consola-monitoreo-toro-trivino/blob/main/docs/capturas/disp_rojo.png)) | ![telegram]([docs/capturas/04-telegram.png](https://github.com/RonaldT06/consola-monitoreo-toro-trivino/blob/main/docs/capturas/telegram.png)) |
 
 El informe completo está en [`docs/informe-corte2.pdf`](docs/informe-corte2.pdf).
 
